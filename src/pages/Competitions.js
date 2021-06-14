@@ -12,8 +12,6 @@ const Competitions = () => {
   const dispatch = useDispatch()	
   const { competitions, loading, hasErrors } = useSelector(competitionsSelector)	
 
-  console.log('Competitions: ', competitions);		
-
   useEffect(() => {
     dispatch(fetchCompetitions())
   }, [dispatch])
@@ -21,12 +19,11 @@ const Competitions = () => {
   const renderCompetitions = () => {
     if (loading) return <p>Loading competitions...</p>
     if (hasErrors) return <p>Cannot display competitions...</p>
-    return <CompetitionsTable data={competitions}/>
+    if (competitions.length) return <CompetitionsTable data={competitions}/>
   }
 
   return (
     <section>
-      <h1>Competitions</h1>
       <div className='content'>
         {renderCompetitions()}
       </div>
