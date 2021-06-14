@@ -14,6 +14,8 @@ import Paper from '@material-ui/core/Paper';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
+import config from '../config'
+
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -84,7 +86,6 @@ function EnhancedTableHead(props) {
 
 EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
@@ -122,10 +123,10 @@ export default function CompetitionsTable({data}) {
   const [rows, setRows] = useState([])
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
-  const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [showUnavailable, setShowUnavailable] = useState(false)
 
   useEffect(()=>{
     const digestRows = []
@@ -139,33 +140,8 @@ export default function CompetitionsTable({data}) {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
+  const handleClick = (event, id) => {
+    console.log(id)
   };
 
   const handleChangePage = (event, newPage) => {
@@ -180,7 +156,9 @@ export default function CompetitionsTable({data}) {
   const handleChangeDense = (event) => {
     setDense(event.target.checked);
   };
-
+  const isAvailable = (id) => {
+    return config.COMPETITIONS.includes(id)
+  }
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   return (
@@ -189,6 +167,10 @@ export default function CompetitionsTable({data}) {
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
           Competitions
         </Typography>
+        <FormControlLabel
+        control={<Switch checked={showUnavailable} onChange={() => setShowUnavailable(o => !o)} />}
+        label="List all competitions (most are unavailable in the free tier)"
+        />
         <TableContainer>
           <Table
             className={classes.table}
@@ -198,15 +180,14 @@ export default function CompetitionsTable({data}) {
           >
             <EnhancedTableHead
               classes={classes}
-              numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
             <TableBody>
               {stableSort(rows, getComparator(order, orderBy))
+                .filter(r => showUnavailable || isAvailable(r.id))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const labelId = `enhanced-competitions-table-${index}`;
@@ -214,9 +195,10 @@ export default function CompetitionsTable({data}) {
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.name)}
+                      onClick={(event) => handleClick(event, row.id)}
                       tabIndex={-1}
                       key={row.id}
+                      style={!isAvailable(row.id) ? {backgroundColor: 'rgba(0,0,0,.1)'} : {}}
                     >
                       <TableCell align="left" component="th" id={labelId} scope="row">
                         {row.name}
@@ -238,7 +220,7 @@ export default function CompetitionsTable({data}) {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={showUnavailable ? rows.length : rows.filter(r => isAvailable(r.id)).length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}
