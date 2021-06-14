@@ -17,7 +17,8 @@ const matchesSlice = createSlice({
       state.loading = true
     },
     getMatchesSuccess: (state, { payload }) => {
-      state.matches = payload
+      state.competition = payload.competition
+      state.matches = payload.matches
       state.loading = false
       state.hasErrors = false
     },
@@ -34,7 +35,7 @@ export const matchesSelector = state => state.matches
 
 export default matchesSlice.reducer
 
-export function fetchMatches(id = 2001) {
+export function fetchMatches(id) {
   return async dispatch => {
     dispatch(getMatches())
 
@@ -44,7 +45,7 @@ export function fetchMatches(id = 2001) {
           'X-Auth-Token': config.API_KEY,
           'Accept': 'application/json',}
       })
-      dispatch(getMatchesSuccess(response.data.matches))
+      dispatch(getMatchesSuccess({'competition': `${response.data.competition.name} (${response.data.competition.area.name})`, 'matches': response.data.matches}))
     } catch (error) {
       dispatch(getMatchesFailure())
     }

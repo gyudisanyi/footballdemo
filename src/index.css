@@ -1,6 +1,10 @@
 html {
-  background-color: #002e0f;
+  background-image: url('./bg.jpg');
   color: #fff;
+}
+
+a {
+  text-decoration: none;
 }
 
 section {
@@ -20,7 +24,7 @@ img {
   width: 300px;
 }
 
-.content {
+#content {
   margin: auto;
   display: flex;
   flex-wrap: wrap;

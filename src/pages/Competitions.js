@@ -24,7 +24,7 @@ const Competitions = () => {
 
   return (
     <section>
-      <div className='content'>
+      <div id='content'>
         {renderCompetitions()}
       </div>
     </section>

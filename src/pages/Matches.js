@@ -15,7 +15,7 @@ const Matches = () => {
   const competitionId = useParams().competitionId;
   
   const dispatch = useDispatch()	
-  const { matches, loading, hasErrors } = useSelector(matchesSelector)	
+  const { competition, matches, loading, hasErrors } = useSelector(matchesSelector)	
 
   
   useEffect(() => {
@@ -26,12 +26,12 @@ const Matches = () => {
   const renderMatches = () => {
     if (loading) return <p>Loading matches...</p>
     if (hasErrors) return <p>Cannot display matches...</p>
-    if (matches.length) return <MatchesTable data={matches}/>
+    if (matches.length) return <MatchesTable competition={competition} data={matches}/>
   }
 
   return(
     <section>
-      <div className='content'>
+      <div id='content'>
         {renderMatches()}
       </div>
     </section>

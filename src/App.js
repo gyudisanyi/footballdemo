@@ -8,9 +8,9 @@ import {
 
 import Competitions from './pages/Competitions'
 import Matches from './pages/Matches'
+import Match from './pages/Match'
 
 const App = () => {
-
 
   return (
     <Router>
@@ -18,7 +18,9 @@ const App = () => {
         <Route exact path="/">
           <Competitions />
         </Route>
-        
+        <Route exact path="/matches/:matchId">
+          <Match />
+        </Route>
         <Route path="/:competitionId">
           <Matches />
         </Route>

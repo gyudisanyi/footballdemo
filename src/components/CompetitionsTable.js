@@ -2,6 +2,7 @@ import  { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -167,11 +168,11 @@ export default function CompetitionsTable({data}) {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Competitions
+          <Button disabled style={{color: 'black'}}>Competitions</Button>
         </Typography>
         <FormControlLabel
         control={<Switch checked={showUnavailable} onChange={() => setShowUnavailable(o => !o)} />}
-        label="List all competitions (most are unavailable in the free tier)"
+        label="List all competitions (most are unavailable by free tier)"
         />
         <TableContainer>
           <Table
@@ -200,7 +201,7 @@ export default function CompetitionsTable({data}) {
                       onClick={isAvailable(row.id) ? (event) => handleClick(event, row.id) : () => console.log('Competition unavailable with the free tier')}
                       tabIndex={-1}
                       key={row.id}
-                      style={!isAvailable(row.id) ? {backgroundColor: 'rgba(0,0,0,.1)'} : {}}
+                      style={!isAvailable(row.id) ? {backgroundColor: 'rgba(0,0,0,.1)'} : {cursor: 'pointer'}}
                     >
                       <TableCell align="left" component="th" id={labelId} scope="row">
                         {row.name}

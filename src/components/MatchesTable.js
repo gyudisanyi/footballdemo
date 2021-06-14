@@ -1,7 +1,8 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -14,8 +15,6 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-
-import config from '../config'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -118,7 +117,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function MatchesTable({data}) {
+export default function MatchesTable({competition, data}) {
   const classes = useStyles();
   const [rows, setRows] = useState([])
   const [order, setOrder] = useState('asc');
@@ -127,6 +126,7 @@ export default function MatchesTable({data}) {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filter, setFilter] = useState(false);
+
   const statuses = ['SCHEDULED', 'LIVE', 'IN_PLAY'];
   
   const path = useHistory()
@@ -139,7 +139,7 @@ export default function MatchesTable({data}) {
         'homeTeam': r.homeTeam.name, 
         'awayTeam': r.awayTeam.name, 
         'status': r.status, 
-        'utcDate': r.utcDate
+        'utcDate': r.utcDate.slice(0,10) + ' at ' + r.utcDate.slice(12,16)
       }))
     setRows(digestRows)    
   }, [data])
@@ -151,7 +151,7 @@ export default function MatchesTable({data}) {
   };
 
   const handleClick = (event, id) => {
-    path.push(`/${id}`);
+    path.push(`/matches/${id}`);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -177,7 +177,7 @@ export default function MatchesTable({data}) {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Matches
+          <Button onClick={()=>path.push('/')}>Competitions</Button>  / <Button disabled style={{color: 'black'}}>{competition}</Button>
         </Typography>
         <FormControlLabel
         control={<Switch checked={filter} onChange={() => setFilter(o => !o)} />}
@@ -216,12 +216,15 @@ export default function MatchesTable({data}) {
                       </TableCell>
                       <TableCell align="left">{row.homeTeam}</TableCell>
                       <TableCell align="left">{row.awayTeam}</TableCell>
-                      <TableCell align="left">{row.utcDate}</TableCell>
+                      <TableCell align="left">
+                        {row.utcDate}
+                        {['LIVE', 'IN_PLAY', 'PAUSED'].includes(row.status) && <strong> LIVE</strong>}
+                      </TableCell>                      
                     </TableRow>
                   );
                 })}
               {(filter && rows.filter(r => toShow(r.status)).length === 0) 
-                ? <TableRow><TableCell>No matches to show</TableCell></TableRow> : ''}
+                ? <TableRow><TableCell>No upcoming matches to show</TableCell></TableRow> : ''}
               {emptyRows > 0 && (
                 <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                   <TableCell colSpan={6} />
