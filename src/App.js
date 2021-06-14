@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 
 import Competitions from './pages/Competitions'
+import Matches from './pages/Matches'
 
 const App = () => {
 
@@ -16,6 +17,10 @@ const App = () => {
       <Switch>
         <Route exact path="/">
           <Competitions />
+        </Route>
+        
+        <Route path="/:competitionId">
+          <Matches />
         </Route>
       </Switch>
     </Router>

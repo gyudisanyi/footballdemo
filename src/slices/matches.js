@@ -44,7 +44,7 @@ export function fetchMatches(id = 2001) {
           'X-Auth-Token': config.API_KEY,
           'Accept': 'application/json',}
       })
-      dispatch(getMatchesSuccess(response.data.competitions))
+      dispatch(getMatchesSuccess(response.data.matches))
     } catch (error) {
       dispatch(getMatchesFailure())
     }

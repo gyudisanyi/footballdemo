@@ -44,10 +44,10 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-  { id: 'area', numeric: false, disablePadding: false, label: 'Area' },
-  { id: 'starts', numeric: false, disablePadding: false, label: 'Starts' },
-  { id: 'ends', numeric: false, disablePadding: false, label: 'Ends' },
+  { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
+  { id: 'homeTeam', numeric: false, disablePadding: false, label: 'Home team' },
+  { id: 'awayTeam', numeric: false, disablePadding: false, label: 'Away team' },
+  { id: 'utcDate', numeric: false, disablePadding: false, label: 'Date' },
 ];
 
 function EnhancedTableHead(props) {
@@ -118,7 +118,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function CompetitionsTable({data}) {
+export default function MatchesTable({data}) {
   const classes = useStyles();
   const [rows, setRows] = useState([])
   const [order, setOrder] = useState('asc');
@@ -126,13 +126,21 @@ export default function CompetitionsTable({data}) {
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [showUnavailable, setShowUnavailable] = useState(false)
-
+  const [filter, setFilter] = useState(false);
+  const statuses = ['SCHEDULED', 'LIVE', 'IN_PLAY'];
+  
   const path = useHistory()
 
   useEffect(()=>{
     const digestRows = []
-    data.map(r => digestRows.push({'id': r.id, 'name': r.name, 'area': r.area.name, 'starts': r.currentSeason ? r.currentSeason.startDate : 'N/A', 'ends': r.currentSeason ? r.currentSeason.endDate : 'N/A'}))
+    data.map(r => digestRows.push(
+      {
+        'id': r.id,
+        'homeTeam': r.homeTeam.name, 
+        'awayTeam': r.awayTeam.name, 
+        'status': r.status, 
+        'utcDate': r.utcDate
+      }))
     setRows(digestRows)    
   }, [data])
 
@@ -158,27 +166,29 @@ export default function CompetitionsTable({data}) {
   const handleChangeDense = (event) => {
     setDense(event.target.checked);
   };
-  const isAvailable = (id) => {
-    return config.COMPETITIONS.includes(id)
+
+  const toShow = (status) => {
+    return statuses.includes(status)
   }
+
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Competitions
+          Matches
         </Typography>
         <FormControlLabel
-        control={<Switch checked={showUnavailable} onChange={() => setShowUnavailable(o => !o)} />}
-        label="List all competitions (most are unavailable in the free tier)"
+        control={<Switch checked={filter} onChange={() => setFilter(o => !o)} />}
+        label="Show scheduled & live events only"
         />
         <TableContainer>
           <Table
             className={classes.table}
             aria-labelledby="tableTitle"
             size={dense ? 'small' : 'medium'}
-            aria-label="competitions table"
+            aria-label="matches table"
           >
             <EnhancedTableHead
               classes={classes}
@@ -189,28 +199,29 @@ export default function CompetitionsTable({data}) {
             />
             <TableBody>
               {stableSort(rows, getComparator(order, orderBy))
-                .filter(r => showUnavailable || isAvailable(r.id))
+                .filter(r => !filter || toShow(r.status))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const labelId = `enhanced-competitions-table-${index}`;
+                  const labelId = `enhanced-matches-table-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={isAvailable(row.id) ? (event) => handleClick(event, row.id) : () => console.log('Competition unavailable with the free tier')}
+                      onClick={(event) => handleClick(event, row.id)}
                       tabIndex={-1}
                       key={row.id}
-                      style={!isAvailable(row.id) ? {backgroundColor: 'rgba(0,0,0,.1)'} : {}}
                     >
                       <TableCell align="left" component="th" id={labelId} scope="row">
-                        {row.name}
+                        {row.status}
                       </TableCell>
-                      <TableCell align="left">{row.area}</TableCell>
-                      <TableCell align="left">{row.starts}</TableCell>
-                      <TableCell align="left">{row.ends}</TableCell>
+                      <TableCell align="left">{row.homeTeam}</TableCell>
+                      <TableCell align="left">{row.awayTeam}</TableCell>
+                      <TableCell align="left">{row.utcDate}</TableCell>
                     </TableRow>
                   );
                 })}
+              {(filter && rows.filter(r => toShow(r.status)).length === 0) 
+                ? <TableRow><TableCell>No matches to show</TableCell></TableRow> : ''}
               {emptyRows > 0 && (
                 <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
                   <TableCell colSpan={6} />
@@ -222,7 +233,7 @@ export default function CompetitionsTable({data}) {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={showUnavailable ? rows.length : rows.filter(r => isAvailable(r.id)).length}
+          count={!filter ? rows.length : rows.filter(r => toShow(r.status)).length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}
