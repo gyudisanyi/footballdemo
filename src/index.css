@@ -1,6 +1,7 @@
 html {
   background-image: url('./bg.jpg');
   color: #fff;
+  caret-color: transparent !important;
 }
 
 a {
