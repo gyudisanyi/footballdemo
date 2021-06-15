@@ -151,6 +151,8 @@ export default function MatchesTable({competition, data}) {
   };
 
   const handleClick = (event, id) => {
+    localStorage.setItem('competition', competition);
+    localStorage.setItem('matches', JSON.stringify(data));
     path.push(`/matches/${id}`);
   };
 
@@ -210,6 +212,7 @@ export default function MatchesTable({competition, data}) {
                       onClick={(event) => handleClick(event, row.id)}
                       tabIndex={-1}
                       key={row.id}
+                      style={{cursor: 'pointer'}}
                     >
                       <TableCell align="left" component="th" id={labelId} scope="row">
                         {row.status}

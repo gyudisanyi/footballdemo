@@ -12,6 +12,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import Badge from '@material-ui/core/Paper';
 
 import { matchesSelector } from '../slices/matches'
 
@@ -19,9 +20,9 @@ const headCells = [
   { id: 'utcDate', label: 'Date' },
   { id: 'homeTeam', label: 'Home team' },
   { id: 'awayTeam', label: 'Away team' },
-  { id: 'homeScore', label: 'Home score' },
-  { id: 'awayScore', label: 'Away score' },
-  { id: 'status', label: 'Status' },
+  { id: 'homeScore', label: 'Home score', align: 'center' },
+  { id: 'awayScore', label: 'Away score', align: 'center' },
+  { id: 'status', label: 'Status', align: 'right' },
 ];
 
 
@@ -58,8 +59,8 @@ const Match = () => {
   const [match, setMatch] = useState({
     'homeTeam': null,
     'homeScore': null,
-    'awayTeam': null,
-    'awayScore': null,
+    'awayTeam': '---',
+    'awayScore': '---',
     'winner': null,
     'status': null,
     'utcDate': null,
@@ -68,7 +69,10 @@ const Match = () => {
   const { competition, matches } = useSelector(matchesSelector)
 
   useEffect(() => {
-    const m = matches.filter(m => '' + m.id === '' + matchId)[0]
+    let matchesDigest = matches;
+    if (!matches.length) {matchesDigest = JSON.parse(localStorage.getItem('matches'))}
+    const m = matchesDigest.filter(m => '' + m.id === '' + matchId)[0]
+    if (m.length === 0) {path.push('/')}  // fallback to start (competitions) page in case store and localstorage empty
     const thisMatch = {};
     thisMatch.utcDate = m.utcDate.slice(0,10) + ' at ' + m.utcDate.slice(12,16);
     thisMatch.homeTeam = m.homeTeam.name;
@@ -86,7 +90,13 @@ const Match = () => {
       <div className={classes.root} id="content">
         <Paper className={classes.paper}>
           <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-            <Button onClick={()=>path.push('/')}>Competitions</Button> / <Button onClick={() => path.goBack()}>{competition}</Button> / <Button disabled style={{color: 'black'}}>{match.homeTeam}</Button> <Button disabled style={{color: 'black'}}>VS</Button> <Button disabled style={{color: 'black'}}>{match.awayTeam}</Button>
+            <Button onClick={()=>path.push('/')}>Competitions</Button>
+             / 
+            <Button onClick={() => path.goBack()}>{competition || localStorage.getItem('competition')}</Button>
+             / 
+            <Button disabled style={{color: 'black'}}>{match.homeTeam}</Button>
+            <Button disabled style={{color: 'black', fontWeight: 900}}>VS</Button>
+            <Button disabled style={{color: 'black'}}>{match.awayTeam}</Button>
           </Typography>
           <TableContainer>
             <Table
@@ -98,7 +108,9 @@ const Match = () => {
                 <TableRow>
                   {headCells.map((headCell) => (
                     <TableCell
-                      key={headCell.id}>
+                      key={headCell.id}
+                      align={headCell.align || 'left'}
+                      >
                       {headCell.label}
                     </TableCell>
                   ))}
@@ -110,9 +122,9 @@ const Match = () => {
                     <TableCell>{match.utcDate}</TableCell>
                     <TableCell>{match.homeTeam}</TableCell>
                     <TableCell>{match.awayTeam}</TableCell>
-                    <TableCell>{match.homeScore || '---'}</TableCell>
-                    <TableCell>{match.awayScore || '---'}</TableCell>
-                    <TableCell>{match.status}</TableCell>
+                    <TableCell align='center' style={{fontWeight: 900, fontSize: '2em'}}>{match.homeScore}</TableCell>
+                    <TableCell align='center' style={{fontWeight: 900, fontSize: '2em'}}>{match.awayScore}</TableCell>
+                    <TableCell align='right'>{match.status}</TableCell>
                   </TableRow>
                 )}
               </TableBody>
