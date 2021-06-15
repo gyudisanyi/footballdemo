@@ -68,7 +68,6 @@ const Match = () => {
   const { competition, matches } = useSelector(matchesSelector)
 
   useEffect(() => {
-    console.log(matches)
     let matchesDigest = matches;
     if (!matches.length) {matchesDigest = JSON.parse(localStorage.getItem('matches'))}
     const m = matchesDigest.filter(m => '' + m.id === '' + matchId)[0]
@@ -81,9 +80,8 @@ const Match = () => {
     thisMatch.awayScore = m.score.fullTime.awayTeam;
     thisMatch.status = m.status;
     thisMatch.winner = m.score.winner;
-    console.log({thisMatch})
     setMatch(thisMatch);
-  }, [])
+  }, [matchId, matches, path])
 
   return (
     <section>
