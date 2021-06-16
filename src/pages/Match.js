@@ -70,8 +70,8 @@ const Match = () => {
   useEffect(() => {
     let matchesDigest = matches;
     if (!matches.length) {matchesDigest = JSON.parse(localStorage.getItem('matches'))}
+    if (!matchesDigest) {path.push('/'); return}  // fallback to start (competitions) page in case store and localstorage empty
     const m = matchesDigest.filter(m => '' + m.id === '' + matchId)[0]
-    if (m.length === 0) {path.push('/')}  // fallback to start (competitions) page in case store and localstorage empty
     const thisMatch = {};
     thisMatch.utcDate = m.utcDate.slice(0,10) + ' at ' + m.utcDate.slice(12,16);
     thisMatch.homeTeam = m.homeTeam.name;
